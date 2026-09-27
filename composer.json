@@ -1,0 +1,13 @@
+{
+  "name": "arhitektahaosa/yu-idiom",
+  "description": "Regional translator and dictionary for the former Yugoslavia.",
+  "license": "MIT",
+  "require": {
+    "php": ">=8.2"
+  },
+  "autoload": {
+    "psr-4": {
+      "YuIdiom\\": "src/"
+    }
+  }
+}
