@@ -1,0 +1,15 @@
+.env
+vendor/
+.idea/
+.vscode/
+*.log
+node_modules/
+.phpunit.cache/
+public/cache/
+storage/cache/*
+!storage/cache/.gitkeep
+services/opus-mt/.venv/
+services/opus-mt/__pycache__/
+services/opus-mt/models/
+*.sqlite
+.DS_Store
