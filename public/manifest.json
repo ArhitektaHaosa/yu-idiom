@@ -1,0 +1,8 @@
+{
+  "name": "yu-idiom",
+  "short_name": "yu-idiom",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f6f4ef",
+  "theme_color": "#111111"
+}
