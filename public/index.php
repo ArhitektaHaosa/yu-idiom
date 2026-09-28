@@ -10,6 +10,8 @@ use YuIdiom\Seo\QualityGate;
 use YuIdiom\Translation\LocalDictionaryProvider;
 use YuIdiom\Translation\OpusMtProvider;
 use YuIdiom\Translation\TranslationManager;
+use YuIdiom\Admin\Auth;
+use YuIdiom\Admin\MissingQueue;
 
 require dirname(__DIR__) . '/src/bootstrap.php';
 
@@ -39,6 +41,9 @@ $router->add('POST', '/translate', function () use ($languages, $translator) {
     $target = preg_replace('/[^a-z]/', '', (string)($_POST['target'] ?? 'en')) ?: 'en';
     $text = mb_substr(trim((string)($_POST['text'] ?? '')), 0, 2000);
     $result = $translator->translate($text, $source, $target);
+    if ($text !== '' && empty($result['items'])) {
+        try { (new MissingQueue())->record($text, $source); } catch (\Throwable) {}
+    }
     $title = 'Translation'; $description = ''; $page = 'home';
     require dirname(__DIR__) . '/views/layout.php';
 });
@@ -102,6 +107,51 @@ $router->add('GET', '/sitemap.xml', function () use ($entries) {
         echo '<url><loc>'.yu_h($base.$p['canonical_path']).'</loc></url>';
     }
     echo '</urlset>';
+});
+
+$router->add('GET', '/admin/login', function () {
+    header('X-Robots-Tag: noindex, nofollow');
+    $title='Admin login'; $description=''; $indexable=false; $page='admin/login'; $error='';
+    require dirname(__DIR__).'/views/layout.php';
+});
+$router->add('POST', '/admin/login', function () {
+    header('X-Robots-Tag: noindex, nofollow');
+    if (!Csrf::check($_POST['_csrf'] ?? null)) { http_response_code(400); echo 'Bad CSRF token'; return; }
+    Csrf::boot();
+    $tries = (int)($_SESSION['admin_tries'] ?? 0);
+    if ($tries >= 8) {
+        http_response_code(429);
+        $title='Admin login'; $description=''; $indexable=false; $page='admin/login'; $error='Too many attempts.';
+        require dirname(__DIR__).'/views/layout.php'; return;
+    }
+    $_SESSION['admin_tries'] = $tries + 1;
+    if (Auth::attempt((string)($_POST['user'] ?? ''), (string)($_POST['password'] ?? ''))) {
+        $_SESSION['admin_tries'] = 0;
+        header('Location: /admin/missing', true, 302); return;
+    }
+    $title='Admin login'; $description=''; $indexable=false; $page='admin/login'; $error='Login failed.';
+    require dirname(__DIR__).'/views/layout.php';
+});
+$router->add('POST', '/admin/logout', function () {
+    if (!Csrf::check($_POST['_csrf'] ?? null)) { http_response_code(400); return; }
+    Auth::logout();
+    header('Location: /admin/login', true, 302);
+});
+$router->add('GET', '/admin/missing', function () {
+    Auth::requireLogin();
+    header('X-Robots-Tag: noindex, nofollow');
+    $status = (string)($_GET['status'] ?? 'open');
+    $rows = (new MissingQueue())->list($status);
+    $title='Missing words'; $description=''; $indexable=false; $page='admin/missing';
+    require dirname(__DIR__).'/views/layout.php';
+});
+$router->add('POST', '/admin/missing', function () {
+    Auth::requireLogin();
+    if (!Csrf::check($_POST['_csrf'] ?? null)) { http_response_code(400); return; }
+    $id = (int)($_POST['id'] ?? 0);
+    if ($id > 0) (new MissingQueue())->setStatus($id, (string)($_POST['set_status'] ?? ''));
+    $filter = preg_replace('/[^a-z]/', '', (string)($_POST['filter'] ?? 'open')) ?: 'open';
+    header('Location: /admin/missing?status='.$filter, true, 302);
 });
 
 $path = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
