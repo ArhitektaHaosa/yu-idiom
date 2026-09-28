@@ -25,4 +25,18 @@ final class Auth
         }
         return false;
     }
+
+    public static function logout(): void
+    {
+        Csrf::boot();
+        unset($_SESSION['admin']);
+    }
+
+    public static function requireLogin(): void
+    {
+        if (!self::check()) {
+            header('Location: /admin/login', true, 302);
+            exit;
+        }
+    }
 }
