@@ -15,11 +15,10 @@
 </form>
 <?php if (is_array($result)): ?>
 <section class="result">
-<?php if (!$result['items']): ?><p>No verified local hit. Machine layer stays off unless OPUSMT_URL is set.</p>
+<?php if (!$result['items']): ?><p>No verified local hit. The query is queued for admin review.</p>
 <?php else: foreach ($result['items'] as $item): ?>
 <article class="hit"><p class="main-tr"><?= yu_h($item['text']) ?></p>
 <p class="meta"><?= yu_h($item['kind']??'natural') ?> · <?= yu_h($item['source']) ?><?php if (!empty($item['verified'])): ?> · verified<?php endif; ?></p>
-<button type="button" class="js-listen" data-text="<?= yu_h($item['text']) ?>" data-lang="<?= yu_h($target) ?>">Listen</button>
 </article>
 <?php endforeach; endif; ?>
 <?php if (!empty($result['entry'])): ?><p><a href="/<?= yu_h($result['entry']['language_code']??$source) ?>-en/<?= yu_h($result['entry']['slug']) ?>">Open dictionary entry</a></p><?php endif; ?>
@@ -29,6 +28,10 @@
 <ul>
 <li><a href="/sr-en/kititi-se-tudjim-perjem">kititi se tuđim perjem</a></li>
 <li><a href="/compare/hleb">hleb / kruh / hljeb</a></li>
-<li><a href="/compare/voz">voz / vlak</a></li>
-<li><a href="/compare/paradajz">paradajz / rajčica</a></li>
+<li><a href="/compare/krompir">krompir / krumpir</a></li>
+<li><a href="/compare/fudbal">fudbal / nogomet</a></li>
+<li><a href="/compare/hiljada">hiljada / tisuća</a></li>
+<li><a href="/sr-en/vuci-za-nos">vući za nos</a></li>
+<li><a href="/sr-en/bacati-bisere-pred-svinje">bacati bisere pred svinje</a></li>
+<li><a href="/sr-en/kupiti-macka-u-dzaku">kupiti mačka u džaku / vreći</a></li>
 </ul></section>
