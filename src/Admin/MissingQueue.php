@@ -27,11 +27,11 @@ final class MissingQueue
             return;
         }
         $st = $this->pdo->prepare(
-            'INSERT INTO missing_words (query_display, query_normalized, source_lang, hit_count, status)
-             VALUES (?, ?, ?, 1, \'open\')
+            "INSERT INTO missing_words (query_display, query_normalized, source_lang, hit_count, status)
+             VALUES (?, ?, ?, 1, 'open')
              ON DUPLICATE KEY UPDATE
                hit_count = hit_count + 1,
-               query_display = VALUES(query_display)'
+               query_display = VALUES(query_display)"
         );
         $st->execute([$display, $norm, $sourceLang]);
     }
